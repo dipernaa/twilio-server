@@ -1,0 +1,18 @@
+sudo: required
+
+services:
+  - docker
+
+language: node_js
+
+node_js:
+  - "node"
+
+install: true
+
+script:
+  - source .travis/configure-tag.sh
+  - docker build -t $CONTAINER_NAME:$TAG .
+
+after_success:
+  - sh .travis/deploy.sh
