@@ -1,19 +1,26 @@
 const { MessagingResponse, VoiceResponse } = require('twilio').twiml;
 const randomPuppy = require('random-puppy');
+const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
 
 const PORT = process.env.PORT || 8080;
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post('/record', (req, res) => {
+app.post('/conference', (req, res) => {
   const twiml = new VoiceResponse();
-  twiml.say('Please leave your message after the beep.');
-  twiml.record({
-    timeout: 10,
-    transcribe: true
-  });
 
-  console.log('recording phone call');
+  if (req.body.Digits) {
+    const dial = twiml.dial();
+    dial.conference({
+      record: 'record-from-start'
+    }, `Room ${req.body.Digits}`);
+  } else {
+    const gather = twiml.gather();
+    gather.say('Please enter your conference number, followed by the pound sign.');
+    twiml.say('We didn\'t receive any input. Goodbye.');
+  }
+
   res.type('text/xml');
   res.send(twiml.toString());
 });
